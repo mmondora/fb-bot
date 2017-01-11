@@ -1,18 +1,49 @@
 <html>
-	<head>
-		<title>Hello Facebook</title>
-	</head>
-	<body>
-		<h3>Hello, <span th:text="${facebookProfile.name}">Some User</span>!</h3>
-		Facebook id <span th:text="${fbId}" />
+<head>
+    <title>Hello Facebook</title>
+</head>
+<body>
+<script>
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '726345354182419',
+            xfbml: true,
+            version: 'v2.8'
+        });
+        FB.AppEvents.logPageView();
+    };
 
-		<h4>Here is your feed:</h4>
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>
 
-		<div th:each="post:${feed}">
-			<b th:text="${post.from.name}">from</b> wrote:
-			<p th:text="${post.message}">message text</p>
-			<img th:if="${post.picture}" th:src="${post.picture}"/>
-			<hr/>
-		</div>
-	</body>
+<div>Bottone</div>
+<div class="fb-send-to-messenger"
+     messenger_app_id="726345354182419"
+     page_id="387095934984311"
+     data-ref="PASS_THROUGH_PARAM"
+     color="blue"
+     size="standard"></div>
+<div>Bottone</div>
+
+<h3>Hello, <span th:text="${fbName}">Some User</span>!</h3>
+Facebook id <span th:text="${fbId}"/>
+
+<form action="/send" method="POST">
+    <p>id <input type="text" name="id" value=""/></p>
+    <p>text <input type="text" name="text" value=""/></p>
+    <p><button type="submit">Send Message to id</button></p>
+</form>
+<form action="/connect/facebook" method="DELETE">
+    <p><button type="submit">Disconnect</button></p>
+</form>
+</body>
 </html>

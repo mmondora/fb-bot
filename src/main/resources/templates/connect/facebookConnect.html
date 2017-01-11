@@ -1,16 +1,49 @@
 <html>
-	<head>
-		<title>Hello Facebook</title>
-	</head>
-	<body>
-		<h3>Connect to Facebook</h3>
+<head>
+    <title>Hello Facebook</title>
+</head>
+<body>
+<script>
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '726345354182419',
+            xfbml: true,
+            version: 'v2.8'
+        });
+        FB.AppEvents.logPageView();
+    };
 
-		<form action="/connect/facebook" method="POST">
-			<input type="hidden" name="scope" value="user_posts" />
-			<div class="formInfo">
-				<p>You aren't connected to Facebook yet. Click the button to connect this application with your Facebook account.</p>
-			</div>
-			<p><button type="submit">Connect to Facebook</button></p>
-		</form>
-	</body>
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<div>Bottone</div>
+<div class="fb-send-to-messenger"
+     messenger_app_id="726345354182419"
+     page_id="387095934984311"
+     data-ref="PASS_THROUGH_PARAM"
+     color="blue"
+     size="small"></div>
+<h3>Connect to Facebook</h3>
+
+<form action="/connect/facebook" method="POST">
+    <input type="hidden" name="scope" value="user_posts,public_profile,email"/>
+
+    <div class="formInfo">
+        <p>You aren't connected to Facebook yet. Click the button to connect this application with your Facebook
+            account.</p>
+    </div>
+    <p>
+        <button type="submit">Connect to Facebook</button>
+    </p>
+</form>
+</body>
 </html>
