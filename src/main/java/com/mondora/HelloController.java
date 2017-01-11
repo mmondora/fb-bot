@@ -33,7 +33,9 @@ public class HelloController {
     private static final String PAGE_ACCESS_TOKEN = "EAAKUm3TRZCxMBAJAlUbfIfh4EXJI9QCgTtIe1PIbGI3dcZBknORacCQEZBT6xD8mUlor23JgRtZABpMVaqndM4D09KUtmFX2MkvxyG3JAY4BC9opasgYcIp6tYMRFx6jTtx7HxozCYAJORg34qacDVfpZBis9fSFcTJQpSstkfgZDZD";
     private static final String FACEBOOK_API_VERSION = "v2.6";
     private static final Properties postbacks = new Properties();
-//    private static Map<String, User> map = new HashMap<String, User>() {
+    private static final Map<String, FBUser> users = new HashMap<>();
+
+    //    private static Map<String, User> map = new HashMap<String, User>() {
 //        @Override
 //        public User put(String key, User value) {
 //            System.out.println("Adding " + value);
@@ -65,13 +67,13 @@ public class HelloController {
 
 //        model.addAttribute("facebookProfile", facebook.userOperations().getUserProfile());
 
-        String [] fields = { "id", "email",  "first_name", "last_name" };
-        User userProfile = facebook.fetchObject("me", User.class, fields);
+        String[] fields = {"id", "email", "first_name", "last_name"};
+        org.springframework.social.facebook.api.User userProfile = facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
 
         PagedList<Post> feed = facebook.feedOperations().getFeed();
         model.addAttribute("feed", feed);
-        model.addAttribute("fbId", userProfile.getId() );
-        model.addAttribute("fbName", userProfile.getFirstName() + " " + userProfile.getLastName() );
+        model.addAttribute("fbId", userProfile.getId());
+        model.addAttribute("fbName", userProfile.getFirstName() + " " + userProfile.getLastName());
 
         System.out.println("Facebook login");
 //        System.out.println("\t"+facebook.userOperations().getUserProfile().getName());
@@ -92,12 +94,12 @@ public class HelloController {
         return "hello";
     }
 
-//    @RequestMapping(path = "map", method = RequestMethod.GET)
-//    public ResponseEntity<String> map() {
-//        StringBuffer out = new StringBuffer();
-//        map.forEach((k, o) -> out.append(o.toString()));
-//        return new ResponseEntity<String>(out.toString(), HttpStatus.OK);
-//    }
+    @RequestMapping(path = "map", method = RequestMethod.GET)
+    public ResponseEntity<String> map() {
+        StringBuffer out = new StringBuffer();
+        users.forEach((k, o) -> out.append(o.toString()));
+        return new ResponseEntity<String>(out.toString(), HttpStatus.OK);
+    }
 
     @RequestMapping(path = "deauth", method = RequestMethod.GET)
     public ResponseEntity<String> deAuth(WebRequest json) {
@@ -153,9 +155,9 @@ public class HelloController {
             JsonNode node = mapper.readTree(json);
             if (valid(node, "object", "page")) {
 //                if( valid(node, "postback") ) {
-                    Strategy s = builder(node);
-                    System.out.println( "Builder " + s.getClass() );
-                    s.run(node);
+                Strategy s = builder(node);
+                System.out.println("Builder " + s.getClass());
+                s.run(node);
 //                }
 //                System.out.println("Id " + id + " text " + text);
             } else {
@@ -193,7 +195,7 @@ public class HelloController {
         return wr != null && wr.get(pname) != null && wr.get(pname).textValue().equals(value);
     }
 
-    private boolean valid(JsonNode wr, String pname ) {
+    private boolean valid(JsonNode wr, String pname) {
         return wr != null && wr.get(pname) != null;
     }
 
@@ -218,24 +220,26 @@ public class HelloController {
         TwoChoicePostback o = new TwoChoicePostback();
         o.recipient.id = id;
         PBPayload payload = o.message.attachment.payload;
-        payload.addElement("Agyo, nuovo documento", text, "https://app.agyo.io/console/index.html" );
-        payload.last().addPostbackButton("Rifiuta", "Rifiuta@" + uuid );
-        payload.last().addPostbackButton("Accetta", "Accetta@" + uuid );
+        payload.addElement("Agyo, nuovo documento", text, "https://app.agyo.io/console/index.html");
+        payload.last().addPostbackButton("Rifiuta", "Rifiuta@" + uuid);
+        payload.last().addPostbackButton("Accetta", "Accetta@" + uuid);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         try {
-            String json =  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+            String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
             sendGenericMessage(json);
-            postbacks.put( uuid, text );
+            postbacks.put(uuid, text);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-    };
+    }
+
+    ;
 
     public void sendGenericMessage(String payload) {
         new Thread(() -> {
-            String id = Thread.currentThread().getName()+"/"+Thread.currentThread().getId();
+            String id = Thread.currentThread().getName() + "/" + Thread.currentThread().getId();
             System.out.println(id + " --- StartOfTransmission");
             try {
                 //EAALrRUp2rHEBAH1ZAPIYfzzGHwRNDYLP0KICrOiKOCknfiMjQ2NmCgBb0Ud6QzKSRx2JUXi8YVvrj07ZBbxorZBkCbrQ6usvxMR2BHarZAGToYAPvea1bzHs6vKILL3YIkuNc8xgh23V7i07shswxRHgIPTUz5ftcgVXSY1ZA3gZDZD
@@ -273,6 +277,61 @@ public class HelloController {
                 e.printStackTrace();
             }
         }).run();
+    }
+
+    private FBUser readMessengerData(String id) {
+        try {
+            String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
+            url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
+            url += "&access_token=" + PAGE_ACCESS_TOKEN;
+            System.out.println(" --- StartOfTransmission");
+            System.out.println("URL " + url);
+            HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
+            urlc.setRequestProperty("Content-Type", "application/json");
+            String json = convertStreamToString(urlc.getInputStream());
+            String err = convertStreamToString(urlc.getErrorStream());
+            System.out.println("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
+
+            if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
+
+                System.out.println("Response " + json);
+
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(json);
+
+                FBUser user = new FBUser();
+                user.first_name = node.get("first_name").textValue();
+                user.last_name = node.get("last_name").textValue();
+//                user.gender = node.get("gender").textValue();
+//                user.profile_pic = node.get("profile_pic").textValue();
+//                user.timezone = node.get("timezone").textValue();
+                user.messenger_id = id;
+
+                users.put(id, user);
+                return user;
+//                Optional<User> u2 = map.values().stream().filter(
+//                        o -> o.last_name.equals(user.last_name) && o.first_name.equals(user.first_name)).findAny();
+//                if (u2.isPresent()) u2.get().messenger_id = id;
+//                else map.put(id, user);
+
+/*                FileOutputStream fos = new FileOutputStream(new File("./facebook.obj"));
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(map);
+                fos.close();*/
+            } else {
+                try {
+                    System.out.println("Error " + err);
+                } catch (Exception e) {
+                }
+                return null;
+            }
+        } catch (Exception e) {
+            System.out.println("\n--- Exception !!");
+            e.printStackTrace();
+            return null;
+        } finally {
+            System.out.println(" --- EndOfTransmission");
+        }
     }
 
 //    private void addToMap(String id) {
@@ -329,102 +388,6 @@ public class HelloController {
         public void run(JsonNode node);
     }
 
-    //"object":"page","entry":[{"id":"292024547861549","time":1483539426515,"messaging":[{"recipient":{"id":"292024547861549"},"timestamp":1483539426515,"sender":{"id":"1250148388409499"},"optin":{"ref":"PASS_THROUGH_PARAM"}}]}]}
-    class Optin implements Strategy {
-        public void run(JsonNode node) {
-            JsonNode optin = node.get("entry").get(0).get("messaging").get(0).get("optin");
-            if (optin != null) {
-                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
-                sendTextMessage(id, "Ciao e benvenuto.");
-            }
-        }
-    }
-
-    //{"object":"page","entry":[{"id":"292024547861549","time":1483540183362,"messaging":[{"sender":{"id":"1250148388409499"},"recipient":{"id":"292024547861549"},"timestamp":1483540183207,"message":{"mid":"mid.1483540183207:5b7bfbd757","seq":16121,"text":"azz"}}]}]}
-    class Message implements Strategy {
-        public void run(JsonNode node) {
-            JsonNode msg = node.get("entry").get(0).get("messaging").get(0).get("message");
-            if (msg != null) {
-                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
-                String text = msg.get("text").asText();
-                if (text != null)
-                    if (text.toLowerCase().contains("is_echo")) {}
-                    else
-                    if (text.toLowerCase().contains("help")) {
-                        new Help().run( node );
-                    } else if (text.toLowerCase().contains("fattura")) {
-                        sendStructuredMessage(id, "fattura da PINCO PALLINO di " + Math.random() * 500 +"€ ");
-                    } else {
-                        sendTextMessage(id, "Grazie per la richiesta '" + text + "'");
-                    }
-            }
-        }
-    }
-
-    class Help implements Strategy {
-        @Override
-        public void run(JsonNode node) {
-            String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
-            sendTextMessage( id, "commands: help, fattura" );
-        }
-    }
-
-    class PostBack implements Strategy {
-        @Override
-        public void run(JsonNode node) {
-            String payload = node.get("entry").get(0).get("messaging").get(0).get("postback").get("payload").asText();
-            System.out.println("Postback -> " + payload );
-            int at = payload.indexOf('@');
-            if( at>0) {
-                String uuid = payload.substring(at+1);
-                String act = payload.substring(0, at);
-                String text = postbacks.getProperty(uuid);
-                System.out.println("Postback -> " + act + " " + uuid + " : " + text);
-                postbacks.remove( uuid );
-
-                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
-                sendTextMessage( id, act + ":" + text );
-                sendTextMessage( "1253251894751382", "id " + id + " " + act + ":" + text );
-            }
-
-        }
-    }
-
-    class Read implements Strategy {
-        @Override
-        public void run(JsonNode node) {
-            System.out.println("Read " + node.textValue() );
-        }
-    }
-
-        @XmlRootElement
-    class Userx implements Serializable {
-        String messenger_id;
-        String id;
-        String first_name;
-        String last_name;
-        String profile_pic;
-        String locale;
-        String timezone;
-        String gender;
-        String is_payment_enabled;
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "id=\"" + id + "\"" +
-                    ",messenger_id=\"" + messenger_id + "\"" +
-                    ", first_name=\"" + first_name + "\"" +
-                    ", last_name=\"" + last_name + "\"" +
-                    ", profile_pic=\"" + profile_pic + "\"" +
-                    ", locale=\"" + locale + "\"" +
-                    ", timezone=\"" + timezone + "\"" +
-                    ", gender=\"" + gender + "\"" +
-                    ", is_payment_enabled=\"" + is_payment_enabled + "\"" +
-                    "}";
-        }
-    }
-
     @XmlRootElement
     static public class TwoChoicePostback {
         public PBRecipient recipient = new PBRecipient();
@@ -446,24 +409,27 @@ public class HelloController {
 
     static public class PBPayload {
         public String template_type = "generic";
-        private PBElement last;
-
         //        public PBElement[] elements = new PBElement[]{ new PBElement() };
         public List<PBElement> elements = new Vector<>();
-        public PBElement addElement( String title, String subtitle, String itemurl, String imageurl ){
+        private PBElement last;
+
+        public PBElement addElement(String title, String subtitle, String itemurl, String imageurl) {
             addElement(title, subtitle, itemurl).image_url = imageurl;
             return last;
         }
 
-        public PBElement addElement( String title, String subtitle, String itemurl ){
-            last= new PBElement();
-            last.title=title;
-            last.subtitle=subtitle;
-            last.item_url=itemurl;
+        public PBElement addElement(String title, String subtitle, String itemurl) {
+            last = new PBElement();
+            last.title = title;
+            last.subtitle = subtitle;
+            last.item_url = itemurl;
             elements.add(last);
             return last;
         }
-        public PBElement last() { return last; }
+
+        public PBElement last() {
+            return last;
+        }
     }
 
     static public class PBElement {
@@ -472,19 +438,21 @@ public class HelloController {
         public String item_url;
         public String image_url;
         public List<PBButton> buttons = new Vector<PBButton>();
-        public void addWebURLButton( String title, String url ) {
+
+        public void addWebURLButton(String title, String url) {
             PBButton uno = new PBButton();
             uno.type = "web_url";
             uno.url = url;
             uno.title = title;
-            buttons.add( uno );
+            buttons.add(uno);
         }
-        public void addPostbackButton( String title, String payload ) {
+
+        public void addPostbackButton(String title, String payload) {
             PBButton uno = new PBButton();
             uno.type = "postback";
             uno.title = title;
             uno.payload = payload;
-            buttons.add( uno );
+            buttons.add(uno);
         }
     }
 
@@ -493,5 +461,103 @@ public class HelloController {
         public String url;
         public String title;
         public String payload;
+    }
+
+    //"object":"page","entry":[{"id":"292024547861549","time":1483539426515,"messaging":[{"recipient":{"id":"292024547861549"},"timestamp":1483539426515,"sender":{"id":"1250148388409499"},"optin":{"ref":"PASS_THROUGH_PARAM"}}]}]}
+    class Optin implements Strategy {
+        public void run(JsonNode node) {
+            JsonNode optin = node.get("entry").get(0).get("messaging").get(0).get("optin");
+            if (optin != null) {
+                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
+                FBUser u = readMessengerData( id );
+                if( u != null )
+                    sendTextMessage(id, "Ciao " + u.first_name + " e benvenuto.");
+                else
+                    sendTextMessage(id, "Ciao e benvenuto.");
+            }
+        }
+    }
+
+    //{"object":"page","entry":[{"id":"292024547861549","time":1483540183362,"messaging":[{"sender":{"id":"1250148388409499"},"recipient":{"id":"292024547861549"},"timestamp":1483540183207,"message":{"mid":"mid.1483540183207:5b7bfbd757","seq":16121,"text":"azz"}}]}]}
+    class Message implements Strategy {
+        public void run(JsonNode node) {
+            JsonNode msg = node.get("entry").get(0).get("messaging").get(0).get("message");
+            if (msg != null) {
+                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
+                String text = msg.get("text").asText();
+                if (text != null)
+                    if (text.toLowerCase().contains("is_echo")) {
+                    } else if (text.toLowerCase().contains("help")) {
+                        new Help().run(node);
+                    } else if (text.toLowerCase().contains("fattura")) {
+                        sendStructuredMessage(id, "fattura da PINCO PALLINO di " + Math.random() * 500 + "€ ");
+                    } else {
+                        sendTextMessage(id, "Grazie per la richiesta '" + text + "'");
+                    }
+            }
+        }
+    }
+
+    class Help implements Strategy {
+        @Override
+        public void run(JsonNode node) {
+            String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
+            sendTextMessage(id, "commands: help, fattura");
+        }
+    }
+
+    class PostBack implements Strategy {
+        @Override
+        public void run(JsonNode node) {
+            String payload = node.get("entry").get(0).get("messaging").get(0).get("postback").get("payload").asText();
+            System.out.println("Postback -> " + payload);
+            int at = payload.indexOf('@');
+            if (at > 0) {
+                String uuid = payload.substring(at + 1);
+                String act = payload.substring(0, at);
+                String text = postbacks.getProperty(uuid);
+                System.out.println("Postback -> " + act + " " + uuid + " : " + text);
+                postbacks.remove(uuid);
+
+                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
+                sendTextMessage(id, act + ":" + text);
+                sendTextMessage("1253251894751382", "id " + id + " " + act + ":" + text);
+            }
+        }
+    }
+
+    class Read implements Strategy {
+        @Override
+        public void run(JsonNode node) {
+            System.out.println("Read " + node.textValue());
+        }
+    }
+
+    @XmlRootElement
+    class FBUser implements Serializable {
+        String messenger_id;
+        String id;
+        String first_name;
+        String last_name;
+        String profile_pic;
+        String locale;
+        String timezone;
+        String gender;
+        String is_payment_enabled;
+
+        @Override
+        public String toString() {
+            return "{" +
+                    " \"id\" : \"" + id + "\", " +
+                    " \"messenger_id\" : \"" + messenger_id + "\"" +
+                    ", \"first_name\" :\"" + first_name + "\"" +
+                    ", \"last_name\" :\"" + last_name + "\"" +
+                    ", \"profile_pic\" :\"" + profile_pic + "\"" +
+                    ", \"locale\" : \"" + locale + "\"" +
+                    ", \"timezone\" :\"" + timezone + "\"" +
+                    ", \"gender\" :\"" + gender + "\"" +
+                    ", \"is_payment_enabled\":\"" + is_payment_enabled + "\"" +
+                    "}";
+        }
     }
 }
