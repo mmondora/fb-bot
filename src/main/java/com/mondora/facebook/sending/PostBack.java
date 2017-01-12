@@ -20,12 +20,15 @@ public class PostBack extends Sender implements Strategy {
             String uuid = payload.substring(at + 1);
             String act = payload.substring(0, at);
             String text = Database.getPostback(uuid);
-            LOG.debug("Postback -> " + act + " " + uuid + " : " + text);
-            Database.removePostback(uuid);
+            if( text != null ) {
+                LOG.debug("Postback -> " + act + " " + uuid + " : " + text);
+                Database.removePostback(uuid);
 
-            String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
-            sendTextMessage(id, act + ":" + text);
-            sendTextMessage("1253251894751382", "id " + id + " " + act + ":" + text);
+                String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
+                sendTextMessage(id, act + ":" + text);
+                sendTextMessage("1253251894751382", "id " + id + " " + act + ":" + text);
+            } else
+                LOG.debug("Postback  -> " + act + " " + uuid + " : non disponibile" );
         }
     }
 }
