@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.PagedList;
 import org.springframework.social.facebook.api.Post;
-import org.springframework.social.facebook.api.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ import java.util.*;
 @Controller
 @RequestMapping("/")
 public class HelloController {
+    private static final Logger LOG = LoggerFactory.getLogger(HelloController.class);
 
     private static final String VALIDATION_TOKEN = "disse_la_vacca_al_mulo";
     private static final String PAGE_ACCESS_TOKEN = "EAAKUm3TRZCxMBAJAlUbfIfh4EXJI9QCgTtIe1PIbGI3dcZBknORacCQEZBT6xD8mUlor23JgRtZABpMVaqndM4D09KUtmFX2MkvxyG3JAY4BC9opasgYcIp6tYMRFx6jTtx7HxozCYAJORg34qacDVfpZBis9fSFcTJQpSstkfgZDZD";
@@ -38,7 +40,7 @@ public class HelloController {
     //    private static Map<String, User> map = new HashMap<String, User>() {
 //        @Override
 //        public User put(String key, User value) {
-//            System.out.println("Adding " + value);
+//            LOG.debug("Adding " + value);
 //            return super.put(key, value);
 //        }
 //    };
@@ -75,22 +77,7 @@ public class HelloController {
         model.addAttribute("fbId", userProfile.getId());
         model.addAttribute("fbName", userProfile.getFirstName() + " " + userProfile.getLastName());
 
-        System.out.println("Facebook login");
-//        System.out.println("\t"+facebook.userOperations().getUserProfile().getName());
-//        System.out.println("\tgetIdsForBusiness " + facebook.userOperations().getIdsForBusiness().toString());
-//        System.out.println("\tgetUserProfile " + facebook.userOperations().getUserProfile().getId());
-//        System.out.println("Pages");
-//        facebook.pageOperations().getAccounts().forEach(o -> System.out.println("\tPage " + o.getName() ));
-//        sendTextMessage(facebook.userOperations().getUserProfile().getId(),
-//                "Welcome from HelloController " + new Date()
-//        );
-
-//        System.out.println("\n\nAmici\n\n");
-//        facebook.friendOperations().getFriends().forEach(
-//                o -> System.out.println("getFriends " + o.getName() + "" + o.getId() + " " + o.getExtraData())
-//        );
-
-        //addToMap( facebook.userOperations().getUserProfile() );
+        LOG.debug("Facebook login");
         return "hello";
     }
 
@@ -103,44 +90,32 @@ public class HelloController {
 
     @RequestMapping(path = "deauth", method = RequestMethod.GET)
     public ResponseEntity<String> deAuth(WebRequest json) {
-        System.out.println("Request " + json.toString());
+        LOG.debug("Request " + json.toString());
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
-//    private void addToMap(org.springframework.social.facebook.api.User userProfile) {
-//        System.out.println("Cover " + userProfile.getCover());
-//        String id = userProfile.getId();
-//        User u = new User();
-//        u.profile_pic = userProfile.getCover().getSource();
-//        u.last_name = userProfile.getLastName();
-//        u.first_name = userProfile.getFirstName();
-//        u.gender = userProfile.getGender();
-//        u.locale = userProfile.getLocale().toString();
-//        u.id = id;
-//        map.put(id, u);
-//    }
-
     @RequestMapping(path = "webhook", method = RequestMethod.GET)
     public ResponseEntity<String> webHook(WebRequest json) {
-        System.out.println("GET /webhook");
-        System.out.println("Request " + json.toString());
-        json.getParameterNames().forEachRemaining(o -> System.out.println(o + " " + json.getParameter(o)));
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("GET /webhook");
+            LOG.debug("Request " + json.toString());
+            json.getParameterNames().forEachRemaining(o -> LOG.debug("\t" + o + " " + json.getParameter(o)));
+        }
         try {
 //            ObjectMapper mapper = new ObjectMapper();
 //            JsonFactory factory = mapper.getFactory();
 //            JsonParser jp = factory.createParser(json);
             if (valid(json, "hub.mode", "subscribe") &&
                     valid(json, "hub.verify_token", VALIDATION_TOKEN)) {
-                System.out.println("Validating webhook");
+                LOG.debug("Validating webhook");
                 return new ResponseEntity(json.getParameter("hub.challenge"), HttpStatus.OK);
 
             } else {
-                System.out.println("Failed validation. Make sure the validation tokens match.");
+                LOG.info("Failed validation. Make sure the validation tokens match.");
                 return new ResponseEntity("Failed validation. Make sure the validation tokens match.", HttpStatus.FORBIDDEN);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.debug("500 " + ex.getMessage(), ex);
             return new ResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -148,24 +123,23 @@ public class HelloController {
 
     @RequestMapping(path = "webhook", method = RequestMethod.POST)
     public ResponseEntity<String> webHookPost(@RequestBody String json) {
-        System.out.println("POST /webhook");
-        System.out.println("Request " + json);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("POST /webhook");
+            LOG.debug("Request " + json);
+        }
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode node = mapper.readTree(json);
             if (valid(node, "object", "page")) {
-//                if( valid(node, "postback") ) {
                 Strategy s = builder(node);
-                System.out.println("Builder " + s.getClass());
+                LOG.debug("Builder " + s.getClass());
                 s.run(node);
-//                }
-//                System.out.println("Id " + id + " text " + text);
             } else {
-                System.out.println("Ignored " + json);
+                LOG.debug("Ignored " + json);
             }
             return new ResponseEntity<String>(HttpStatus.OK);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.debug("500 " + e.getMessage(), e);
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -240,7 +214,7 @@ public class HelloController {
     public void sendGenericMessage(String payload) {
         new Thread(() -> {
             String id = Thread.currentThread().getName() + "/" + Thread.currentThread().getId();
-            System.out.println(id + " --- StartOfTransmission");
+            LOG.debug(id + " --- StartOfTransmission");
             try {
                 //EAALrRUp2rHEBAH1ZAPIYfzzGHwRNDYLP0KICrOiKOCknfiMjQ2NmCgBb0Ud6QzKSRx2JUXi8YVvrj07ZBbxorZBkCbrQ6usvxMR2BHarZAGToYAPvea1bzHs6vKILL3YIkuNc8xgh23V7i07shswxRHgIPTUz5ftcgVXSY1ZA3gZDZD
                 String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/me/messages";
@@ -255,26 +229,24 @@ public class HelloController {
                     output.write(payload.getBytes());
                 }
 
-                System.out.println(id + " POST to URL " + url);
-                System.out.println(id + " " + payload);
-
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(id + " POST to URL " + url);
+                    LOG.debug(id + " " + payload);
+                }
                 try {
-                    System.out.println(id + " --- Error");
-                    System.out.println(id + " " + convertStreamToString(((HttpURLConnection) urlc).getErrorStream()));
+                    LOG.error(id + " " + convertStreamToString(((HttpURLConnection) urlc).getErrorStream()));
                 } catch (Exception e) {
                 }
 
                 try {
-                    System.out.println(id + " --- Input");
-                    System.out.println(convertStreamToString(urlc.getInputStream()));
+                    LOG.info(convertStreamToString(urlc.getInputStream()));
                 } catch (Exception e) {
                 }
 
-                System.out.println(id + " --- EndOfTransmission");
+                LOG.debug(id + " --- EndOfTransmission");
 
             } catch (Exception e) {
-                System.out.println(id + " --- Exception !!");
-                e.printStackTrace();
+                LOG.debug(id + " --- Exception !!", e);
             }
         }).run();
     }
@@ -284,17 +256,17 @@ public class HelloController {
             String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
             url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
             url += "&access_token=" + PAGE_ACCESS_TOKEN;
-            System.out.println(" --- StartOfTransmission");
-            System.out.println("URL " + url);
+            LOG.debug(" --- StartOfTransmission");
+            LOG.debug("URL " + url);
             HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
             urlc.setRequestProperty("Content-Type", "application/json");
             String json = convertStreamToString(urlc.getInputStream());
             String err = convertStreamToString(urlc.getErrorStream());
-            System.out.println("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
+            LOG.debug("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
 
             if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
 
-                System.out.println("Response " + json);
+                LOG.debug("Response " + json);
 
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode node = mapper.readTree(json);
@@ -309,80 +281,20 @@ public class HelloController {
 
                 users.put(id, user);
                 return user;
-//                Optional<User> u2 = map.values().stream().filter(
-//                        o -> o.last_name.equals(user.last_name) && o.first_name.equals(user.first_name)).findAny();
-//                if (u2.isPresent()) u2.get().messenger_id = id;
-//                else map.put(id, user);
-
-/*                FileOutputStream fos = new FileOutputStream(new File("./facebook.obj"));
-                ObjectOutputStream oos = new ObjectOutputStream(fos);
-                oos.writeObject(map);
-                fos.close();*/
             } else {
                 try {
-                    System.out.println("Error " + err);
+                    LOG.error("Error " + err);
                 } catch (Exception e) {
                 }
                 return null;
             }
         } catch (Exception e) {
-            System.out.println("\n--- Exception !!");
-            e.printStackTrace();
+            LOG.error("\n--- Exception !!", e);
             return null;
         } finally {
-            System.out.println(" --- EndOfTransmission");
+            LOG.debug(" --- EndOfTransmission");
         }
     }
-
-//    private void addToMap(String id) {
-//        Optional<User> u = map.values().stream().filter(o -> o.messenger_id.equals(id)).findAny();
-//        if (!u.isPresent())
-//            try {
-//                String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
-//                url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
-//                url += "&access_token=" + PAGE_ACCESS_TOKEN;
-//                System.out.println("URL " + url);
-//                HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
-//                urlc.setRequestProperty("Content-Type", "application/json");
-//                String json = convertStreamToString(urlc.getInputStream());
-//                String err = convertStreamToString(urlc.getErrorStream());
-//                System.out.println("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
-//
-//                if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
-//
-//                    System.out.println("Response " + json);
-//
-//                    ObjectMapper mapper = new ObjectMapper();
-//                    JsonNode node = mapper.readTree(json);
-//
-//                    User user = new User();
-//                    user.first_name = node.get("first_name").textValue();
-//                    user.last_name = node.get("last_name").textValue();
-//                    user.gender = node.get("gender").textValue();
-//                    user.profile_pic = node.get("profile_pic").textValue();
-//                    user.timezone = node.get("timezone").textValue();
-//                    user.messenger_id = id;
-//
-//                    Optional<User> u2 = map.values().stream().filter(
-//                            o -> o.last_name.equals(user.last_name) && o.first_name.equals(user.first_name)).findAny();
-//                    if (u2.isPresent()) u2.get().messenger_id = id;
-//                    else map.put(id, user);
-//
-///*                FileOutputStream fos = new FileOutputStream(new File("./facebook.obj"));
-//                ObjectOutputStream oos = new ObjectOutputStream(fos);
-//                oos.writeObject(map);
-//                fos.close();*/
-//                } else {
-//                    try {
-//                        System.out.println("Error " + err);
-//                    } catch (Exception e) {
-//                    }
-//                }
-//            } catch (Exception e) {
-//                System.out.println("\n--- Exception !!");
-//                e.printStackTrace();
-//            }
-//    }
 
     interface Strategy {
         public void run(JsonNode node);
@@ -469,8 +381,8 @@ public class HelloController {
             JsonNode optin = node.get("entry").get(0).get("messaging").get(0).get("optin");
             if (optin != null) {
                 String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
-                FBUser u = readMessengerData( id );
-                if( u != null )
+                FBUser u = readMessengerData(id);
+                if (u != null)
                     sendTextMessage(id, "Ciao " + u.first_name + " e benvenuto.");
                 else
                     sendTextMessage(id, "Ciao e benvenuto.");
@@ -510,13 +422,13 @@ public class HelloController {
         @Override
         public void run(JsonNode node) {
             String payload = node.get("entry").get(0).get("messaging").get(0).get("postback").get("payload").asText();
-            System.out.println("Postback -> " + payload);
+            LOG.debug("Postback -> " + payload);
             int at = payload.indexOf('@');
             if (at > 0) {
                 String uuid = payload.substring(at + 1);
                 String act = payload.substring(0, at);
                 String text = postbacks.getProperty(uuid);
-                System.out.println("Postback -> " + act + " " + uuid + " : " + text);
+                LOG.debug("Postback -> " + act + " " + uuid + " : " + text);
                 postbacks.remove(uuid);
 
                 String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
@@ -529,7 +441,7 @@ public class HelloController {
     class Read implements Strategy {
         @Override
         public void run(JsonNode node) {
-            System.out.println("Read " + node.textValue());
+            LOG.debug("Read " + node.textValue());
         }
     }
 
