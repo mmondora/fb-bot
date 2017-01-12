@@ -2,12 +2,10 @@ package com.mondora;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mondora.facebook.postback.TwoChoicePostback;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +20,7 @@ public class PostbackBuilderTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        HelloController.TwoChoicePostback o = new HelloController.TwoChoicePostback();
+        TwoChoicePostback o = new TwoChoicePostback();
         o.recipient.id = "2";
         o.message.attachment.payload
                 .addElement( "rift", "Next-generation virtual reality", "https://www.oculus.com/en-us/rift/", "http://messengerdemo.parseapp.com/img/rift.png");
