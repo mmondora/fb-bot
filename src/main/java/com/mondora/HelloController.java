@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mondora.model.FBUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -29,13 +28,16 @@ import java.util.*;
 @Controller
 @RequestMapping("/")
 public class HelloController {
+    static final Map<String, FBUser> users = new HashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(HelloController.class);
-
     private static final String VALIDATION_TOKEN = "disse_la_vacca_al_mulo";
     private static final String PAGE_ACCESS_TOKEN = "EAAKUm3TRZCxMBAJAlUbfIfh4EXJI9QCgTtIe1PIbGI3dcZBknORacCQEZBT6xD8mUlor23JgRtZABpMVaqndM4D09KUtmFX2MkvxyG3JAY4BC9opasgYcIp6tYMRFx6jTtx7HxozCYAJORg34qacDVfpZBis9fSFcTJQpSstkfgZDZD";
     private static final String FACEBOOK_API_VERSION = "v2.6";
     private static final Properties postbacks = new Properties();
-    private static final Map<String, FBUser> users = new HashMap<>();
+
+    static {
+        loadMap("users.obj");
+    }
 
     //    private static Map<String, User> map = new HashMap<String, User>() {
 //        @Override
@@ -59,6 +61,41 @@ public class HelloController {
             java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
             return s.hasNext() ? s.next() : "";
         } else return "";
+    }
+
+    protected static void saveMap(String filename) {
+        if (users != null && !users.isEmpty())
+            try {
+                if( LOG.isDebugEnabled() ) {
+                    LOG.debug("Saving Map for users");
+                    users.forEach( (o,i)->LOG.debug( i.toString() ));
+                }
+                final OutputStream out = new FileOutputStream(new File(filename));
+                try (ObjectOutputStream oos = new ObjectOutputStream(out)) {
+                    oos.writeObject(users);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+    }
+
+    protected static Map<String, FBUser> loadMap(String filename) {
+        try {
+            final InputStream out = new FileInputStream(new File(filename));
+            try (ObjectInputStream oos = new ObjectInputStream(out)) {
+                Map<String, FBUser> z = (HashMap<String, FBUser>) oos.readObject();
+                users.putAll(z);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 
     @GetMapping
@@ -119,7 +156,6 @@ public class HelloController {
             return new ResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @RequestMapping(path = "webhook", method = RequestMethod.POST)
     public ResponseEntity<String> webHookPost(@RequestBody String json) {
@@ -252,48 +288,53 @@ public class HelloController {
     }
 
     private FBUser readMessengerData(String id) {
-        try {
-            String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
-            url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
-            url += "&access_token=" + PAGE_ACCESS_TOKEN;
-            LOG.debug(" --- StartOfTransmission");
-            LOG.debug("URL " + url);
-            HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
-            urlc.setRequestProperty("Content-Type", "application/json");
-            String json = convertStreamToString(urlc.getInputStream());
-            String err = convertStreamToString(urlc.getErrorStream());
-            LOG.debug("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
+        FBUser find = users.get(id);
+        if (find != null) {
+            LOG.debug("Cache Hit for user " + find.messenger_id + " " + find.first_name + " " + find.last_name);
+            return find;
+        } else
+            try {
+                String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
+                url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
+                url += "&access_token=" + PAGE_ACCESS_TOKEN;
+                LOG.debug(" --- StartOfTransmission");
+                LOG.debug("URL " + url);
+                HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
+                urlc.setRequestProperty("Content-Type", "application/json");
+                String json = convertStreamToString(urlc.getInputStream());
+                String err = convertStreamToString(urlc.getErrorStream());
+                LOG.debug("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
 
-            if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
+                if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
 
-                LOG.debug("Response " + json);
+                    LOG.debug("Response " + json);
 
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode node = mapper.readTree(json);
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode node = mapper.readTree(json);
 
-                FBUser user = new FBUser();
-                user.first_name = node.get("first_name").textValue();
-                user.last_name = node.get("last_name").textValue();
+                    FBUser user = new FBUser();
+                    user.first_name = node.get("first_name").textValue();
+                    user.last_name = node.get("last_name").textValue();
 //                user.gender = node.get("gender").textValue();
 //                user.profile_pic = node.get("profile_pic").textValue();
 //                user.timezone = node.get("timezone").textValue();
-                user.messenger_id = id;
+                    user.messenger_id = id;
 
-                users.put(id, user);
-                return user;
-            } else {
-                try {
-                    LOG.error("Error " + err);
-                } catch (Exception e) {
+                    users.put(id, user);
+                    return user;
+                } else {
+                    try {
+                        LOG.error("Error " + err);
+                    } catch (Exception e) {
+                    }
+                    return null;
                 }
+            } catch (Exception e) {
+                LOG.error("\n--- Exception !!", e);
                 return null;
+            } finally {
+                LOG.debug(" --- EndOfTransmission");
             }
-        } catch (Exception e) {
-            LOG.error("\n--- Exception !!", e);
-            return null;
-        } finally {
-            LOG.debug(" --- EndOfTransmission");
-        }
     }
 
     interface Strategy {
@@ -382,9 +423,11 @@ public class HelloController {
             if (optin != null) {
                 String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
                 FBUser u = readMessengerData(id);
-                if (u != null)
-                    sendTextMessage(id, "Ciao " + u.first_name + " e benvenuto.");
-                else
+                u.b2b_id = node.get("entry").get(0).get("messaging").get(0).get("optin").get("ref").asText();
+                if (u != null) {
+                    sendTextMessage(id, "Ciao " + u.first_name + " e benvenuto." );
+                    saveMap("users.obj");
+                } else
                     sendTextMessage(id, "Ciao e benvenuto.");
             }
         }
@@ -442,34 +485,6 @@ public class HelloController {
         @Override
         public void run(JsonNode node) {
             LOG.debug("Read " + node.textValue());
-        }
-    }
-
-    @XmlRootElement
-    class FBUser implements Serializable {
-        String messenger_id;
-        String id;
-        String first_name;
-        String last_name;
-        String profile_pic;
-        String locale;
-        String timezone;
-        String gender;
-        String is_payment_enabled;
-
-        @Override
-        public String toString() {
-            return "{" +
-                    " \"id\" : \"" + id + "\", " +
-                    " \"messenger_id\" : \"" + messenger_id + "\"" +
-                    ", \"first_name\" :\"" + first_name + "\"" +
-                    ", \"last_name\" :\"" + last_name + "\"" +
-                    ", \"profile_pic\" :\"" + profile_pic + "\"" +
-                    ", \"locale\" : \"" + locale + "\"" +
-                    ", \"timezone\" :\"" + timezone + "\"" +
-                    ", \"gender\" :\"" + gender + "\"" +
-                    ", \"is_payment_enabled\":\"" + is_payment_enabled + "\"" +
-                    "}";
         }
     }
 }
