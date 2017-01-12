@@ -1,4 +1,4 @@
-package com.mondora;
+package com.mondora.strategy;
 
 import com.mondora.model.Event;
 import com.mondora.strategy.ExecuteStrategy;
@@ -28,10 +28,12 @@ public class StrategyService {
     public StrategyService() throws Exception {
         this.updateStrategyMap = new HashMap<>();
 //        this.updateStrategyMap.put("ROLES_UPDATED", new UpdateScopes(userAuthScopeRepository));
+        this.updateStrategyMap.put( "*", new LogMessage() );
     }
 
     public void execute(Event event) throws Exception {
         String eventName = Optional.ofNullable(event.getEventName()).orElse("");
+        Optional.ofNullable(updateStrategyMap.get("*")).ifPresent(value -> value.execute(event));
         if (event.getId() != null) {
             Optional.ofNullable(updateStrategyMap.get(eventName)).ifPresent(value -> value.execute(event));
         }

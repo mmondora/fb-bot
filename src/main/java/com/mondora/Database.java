@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Created by mmondora on 12/01/2017.
@@ -73,6 +74,9 @@ public class Database {
     public static FBUser findUser(String id) {
         return users.get(id);
     }
+    public static Optional<FBUser> findUserByB2B(String id) {
+        return users.values().stream().filter( o->o.b2b_id.equals(id )).findAny();
+    }
 
     public static void saveUser(String id, FBUser user) {
         users.put( id, user );
@@ -85,7 +89,7 @@ public class Database {
     public static Collection<String> listAllPostback() {
         Vector<String> out = new Vector<>();
         if( ! postbacks.isEmpty() )
-            postbacks.stringPropertyNames().forEach(o -> out.add("{ \"id\" : \"" + o + "\", \"value\" : \"" + postbacks.getProperty(o)+"\"}"));
+            postbacks.stringPropertyNames().forEach(o -> out.add("{ \"id\" : \"" + o + "\", \"value\" : \"" + postbacks.getProperty(o) + "\"}"));
         return out;
     }
 }

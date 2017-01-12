@@ -3,6 +3,7 @@ package com.mondora;
 import com.mondora.model.Event;
 import com.mondora.model.EventParseException;
 
+import com.mondora.strategy.StrategyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
