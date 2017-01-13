@@ -12,10 +12,11 @@ Configurazione AuthUpdater
 ```
 #!sh
 export BUS_HOST="bus-b2bhub-dev.servicebus.windows.net"
-export BUS_USER="read"
-export BUS_PASS=""
-export TOPIC_NAME="b2bnotification"
-export SUBSCRIPTION_NAME="b2bot"
+export BUS_USER="read”
+export BUS_PASS="“
+export SUBSCRIPTION_NAME=“b2b_bot"
+export TOPIC_NAME="b2b_notification"
+export FACEBOOK_PAGE_ACCESS_TOKEN=""
 ```
 
 Compilazione
@@ -29,7 +30,8 @@ Avvio
 -----
 
 ```sh
-mvn clean spring-boot:run```
+mvn clean spring-boot:run
+```
 
 Notes
 -----

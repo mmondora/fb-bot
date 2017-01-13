@@ -40,4 +40,14 @@ public class Utils {
         }
         return null;
     }
+
+    public static String getenv(String key, String defaultValue){
+        String out = System.getenv(key);
+        if( out == null ) return defaultValue;
+        return out;
+    }
+
+    public static String getenv(String key) {
+        return System.getenv(key);
+    }
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mondora.Database;
 import com.mondora.HelloController;
 import com.mondora.Utils;
-import com.mondora.facebook.Configuration;
 import com.mondora.model.FBUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +42,9 @@ public class Optin extends Sender implements Strategy {
             return find;
         } else
             try {
-                String url = "https://graph.facebook.com/" + Configuration.FACEBOOK_API_VERSION + "/" + id;
+                String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
                 url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
-                url += "&access_token=" + Configuration.PAGE_ACCESS_TOKEN;
+                url += "&access_token=" + PAGE_ACCESS_TOKEN;
                 LOG.debug(" --- StartOfTransmission");
                 LOG.debug("URL " + url);
                 HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();

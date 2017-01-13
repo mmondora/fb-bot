@@ -4,8 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.springframework</groupId>
-    <artifactId>gs-accessing-facebook</artifactId>
+    <artifactId>b2b-facebook</artifactId>
     <version>0.1.0</version>
+    <name>b2bbot</name>
+
 
     <parent>
         <groupId>org.springframework.boot</groupId>
