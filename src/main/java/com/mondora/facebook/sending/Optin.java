@@ -3,8 +3,6 @@ package com.mondora.facebook.sending;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mondora.Database;
-import com.mondora.HelloController;
-import com.mondora.Utils;
 import com.mondora.model.FBUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import static com.mondora.Utils.convertStreamToString;
  */ //"object":"page","entry":[{"id":"292024547861549","time":1483539426515,"messaging":[{"recipient":{"id":"292024547861549"},"timestamp":1483539426515,"sender":{"id":"1250148388409499"},"optin":{"ref":"PASS_THROUGH_PARAM"}}]}]}
 public class Optin extends Sender implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(Optin.class);
-
 
     public void run(JsonNode node) {
         JsonNode optin = node.get("entry").get(0).get("messaging").get(0).get("optin");
@@ -42,19 +39,20 @@ public class Optin extends Sender implements Strategy {
             return find;
         } else
             try {
-                String url = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
-                url += "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
+                String hostname = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
+                String url = hostname + "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
                 url += "&access_token=" + PAGE_ACCESS_TOKEN;
-                LOG.debug(" --- StartOfTransmission");
-                LOG.debug("URL " + url);
+                if( LOG.isDebugEnabled() ) {
+                    LOG.debug(" --- StartOfTransmission");
+                    LOG.debug("URL " + url);
+                }
                 HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
                 urlc.setRequestProperty("Content-Type", "application/json");
                 String json = convertStreamToString(urlc.getInputStream());
                 String err = convertStreamToString(urlc.getErrorStream());
-                LOG.debug("URL " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
+                LOG.info("GET " + hostname + " " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
 
                 if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
-
                     LOG.debug("Response " + json);
 
                     ObjectMapper mapper = new ObjectMapper();
@@ -71,14 +69,11 @@ public class Optin extends Sender implements Strategy {
                     Database.saveUser(id, user);
                     return user;
                 } else {
-                    try {
-                        LOG.error("Error " + err);
-                    } catch (Exception e) {
-                    }
+                    LOG.error("Error " + err);
                     return null;
                 }
             } catch (Exception e) {
-                LOG.error("\n--- Exception !!", e);
+                LOG.error(e.getMessage(), e);
                 return null;
             } finally {
                 LOG.debug(" --- EndOfTransmission");

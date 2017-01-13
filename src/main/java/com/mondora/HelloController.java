@@ -38,6 +38,7 @@ public class HelloController {
 
     @GetMapping
     public String helloFacebook(Model model) {
+        LOG.debug("GET /" );
         if (connectionRepository.findPrimaryConnection(Facebook.class) == null) {
             return "redirect:/connect/facebook";
         }
@@ -50,13 +51,12 @@ public class HelloController {
         model.addAttribute("feed", feed);
         model.addAttribute("fbId", userProfile.getId());
         model.addAttribute("fbName", userProfile.getFirstName() + " " + userProfile.getLastName());
-
-        LOG.debug("Facebook login");
         return "hello";
     }
 
     @RequestMapping(path = "map", method = RequestMethod.GET)
     public ResponseEntity<String> map() {
+        LOG.debug("GET /map " );
         StringBuffer out = new StringBuffer();
         Database.listAll().forEach(o -> out.append(o.toString()));
         Database.listAllPostback().forEach(o -> out.append( Utils.toJson(o)));
@@ -65,15 +65,14 @@ public class HelloController {
 
     @RequestMapping(path = "deauth", method = RequestMethod.GET)
     public ResponseEntity<String> deAuth(WebRequest json) {
-        LOG.debug("Request " + json.toString());
+        LOG.debug("GET /deauth " + json.toString());
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
     @RequestMapping(path = "webhook", method = RequestMethod.GET)
     public ResponseEntity<String> webHook(WebRequest json) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("GET /webhook");
-            LOG.debug("Request " + json.toString());
+            LOG.debug("GET /webhook " + json.toString());
             json.getParameterNames().forEachRemaining(o -> LOG.debug("\t" + o + " " + json.getParameter(o)));
         }
         try {
@@ -86,7 +85,7 @@ public class HelloController {
                 return new ResponseEntity("Failed validation. Make sure the validation tokens match.", HttpStatus.FORBIDDEN);
             }
         } catch (Exception ex) {
-            LOG.debug("500 " + ex.getMessage(), ex);
+            LOG.error("500 " + ex.getMessage(), ex);
             return new ResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -94,15 +93,13 @@ public class HelloController {
     @RequestMapping(path = "webhook", method = RequestMethod.POST)
     public ResponseEntity<String> webHookPost(@RequestBody String json) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("POST /webhook");
-            LOG.debug("Request " + json);
+            LOG.debug("POST /webhook " + json);
         }
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode node = mapper.readTree(json);
             if (valid(node, "object", "page")) {
                 Strategy s = StrategyBuilder.builder(node);
-//                LOG.debug("Builder " + s.getClass());
                 s.run(node);
             } else {
                 LOG.debug("Ignored " + json);
