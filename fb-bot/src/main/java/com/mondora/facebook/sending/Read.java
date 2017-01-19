@@ -14,6 +14,7 @@ public class Read implements Strategy {
 
     @Override
     public void run(JsonNode node) {
+        LOG.info("read");
         if( node != null ) {
             String watermark =  node.get("entry").get(0).get("messaging").get(0).get("read").get("watermark").asText();
             LOG.info("Read message " + watermark );

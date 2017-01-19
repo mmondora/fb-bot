@@ -22,6 +22,7 @@ public class PostBackDefault extends Sender implements Strategy {
 
     @Override
     public void run(JsonNode node) {
+        LOG.info( "PostBack default");
         Database.removePostback(uuid);
         String id = getId( node );
         sendTextMessage(id, act + ":" + text);

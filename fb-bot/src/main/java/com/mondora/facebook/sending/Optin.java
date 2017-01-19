@@ -19,6 +19,7 @@ public class Optin extends Sender implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(Optin.class);
 
     public void run(JsonNode node) {
+        LOG.info( "Optin");
         JsonNode optin = node.get("entry").get(0).get("messaging").get(0).get("optin");
         if (optin != null) {
             String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
