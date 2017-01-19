@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
  */
 public class PostBackDefault extends Sender implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(PostBackDefault.class);
-    String act;
-    String uuid;
-    String text;
+    protected String act;
+    protected String uuid;
+    protected String text;
 
     public PostBackDefault(String act, String uuid, String text) {
         this.act = act;
@@ -28,6 +28,6 @@ public class PostBackDefault extends Sender implements Strategy {
         sendTextMessage(id, act + ":" + text);
 
         // send message to me
-        sendTextMessage("1253251894751382", "id " + id + " " + act + ":" + text);
+        if( LOG.isDebugEnabled() ) sendTextMessage("1253251894751382", "id " + id + " " + act + ":" + text);
     }
 }

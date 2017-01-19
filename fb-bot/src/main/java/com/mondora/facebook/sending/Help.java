@@ -18,7 +18,7 @@ public class Help extends Sender implements Strategy {
         LOG.info( "Help");
         TwoChoicePostback o = createPostBack(node);
         PBPayload payload = o.message.attachment.payload;
-        PBElement element = payload.addElement("Agyo, help", "I comandi disponibili sono", "https://app.agyo.io/");
+        PBElement element = payload.addElement("I comandi disponibili sono", "", null);
         element.addPostbackButton("Simula notifica", "fattura");
         element.addPostbackButton("Lista di oggi", "listToday");
         element.addPostbackButton("Statistiche", "stats");

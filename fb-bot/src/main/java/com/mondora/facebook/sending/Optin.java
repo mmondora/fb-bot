@@ -33,7 +33,7 @@ public class Optin extends Sender implements Strategy {
         }
     }
 
-    private FBUser readMessengerData(String id) {
+    protected FBUser readMessengerData(String id) {
         FBUser find = Database.findUser(id);
         if (find != null) {
             LOG.debug("Cache Hit for user " + find.messenger_id + " " + find.first_name + " " + find.last_name);

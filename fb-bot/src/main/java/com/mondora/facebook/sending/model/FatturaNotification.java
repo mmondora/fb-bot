@@ -1,10 +1,14 @@
-package com.mondora.facebook.sending;
+package com.mondora.facebook.sending.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Database;
+import com.mondora.facebook.sending.Default;
+import com.mondora.facebook.sending.Sender;
+import com.mondora.facebook.sending.Strategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
 import java.util.UUID;
 
 /**
@@ -12,13 +16,14 @@ import java.util.UUID;
  */
 public class FatturaNotification extends Sender implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(Default.class);
+    static DecimalFormat decimalFormat = new DecimalFormat("#,##0.00€");
 
     @Override
     public void run(JsonNode node) {
-        LOG.info("Nuova fattura");
+        String fattua = "Ricevuta fattura da " + Database.randomCustomer() + " di " + decimalFormat.format(Math.random() * 500) + "€ ";
+        LOG.info("Nuova " + fattua );
         String id = getId( node );
         String uuid = UUID.randomUUID().toString();
-        String fattua = "fattura da PINCO PALLINO di " + Math.random() * 500 + "€ ";
         sendStructuredMessage(id, uuid, fattua);
         Database.addPostbacks(uuid, fattua);
     }

@@ -2,6 +2,7 @@ package com.mondora.facebook;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.facebook.sending.*;
+import com.mondora.facebook.sending.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ public class StrategyBuilder {
         if (n != null) return new Optin();
 
         n = node.get("entry").get(0).get("messaging").get(0).get("postback");
-        if (n != null) return new PostBack();
+        if (n != null) return new PostBackHandler();
 
         n = node.get("entry").get(0).get("messaging").get(0).get("read");
         if (n != null) return new Read();
@@ -24,7 +25,7 @@ public class StrategyBuilder {
         n = node.get("entry").get(0).get("messaging").get(0).get("delivery");
         if (n != null) return new Ignore();
 
-        return new Message();
+        return new MessageHandler();
     }
 
     public static Strategy buildStrategyFromMessage(String text) {
@@ -37,7 +38,7 @@ public class StrategyBuilder {
                 out = new FatturaNotification();
             } else if (text.toLowerCase().equals("stats")) {
                 out = new Stats();
-            } else if (text.toLowerCase().equals("listToday")) {
+            } else if (text.toLowerCase().equals("listtoday")) {
                 out = new ListToday();
             } else if (text.toLowerCase().equals("list")) {
                 out = new List();
@@ -46,6 +47,7 @@ public class StrategyBuilder {
     }
 
     public static Strategy buildFromPostback( String act, String uuid, String text ) {
+        if( act.equalsIgnoreCase("view")) return new View( act, uuid, text );
         return new PostBackDefault(act, uuid, text );
     }
 }

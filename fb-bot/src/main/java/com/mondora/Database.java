@@ -113,4 +113,18 @@ public class Database {
     public static double totaleFattura() {
         return fattura.values().stream().mapToDouble( o->o.importo ).sum();
     }
+
+    public static String randomCustomer() {
+        return customers[new Random().nextInt(customers.length)];
+    }
+
+    static String[] customers = new String[]{"QC Terme Bormio","Mondora SRL SB", "Telecom Italia SPA", "Banca Etica SCRL", "Wind", "Easy Rent srl", "Zecca Formaggi", "Valli del Bitto", "Cozza Amara", "Autogrill SPA", "Enel energia SPA", "Apple SPA"};
+
+    public static Collection<FBUser> listAllUsers() {
+        return users.values();
+    }
+
+    public static Fattura findFattura(String uuid) {
+        return fattura.get(uuid);
+    }
 }

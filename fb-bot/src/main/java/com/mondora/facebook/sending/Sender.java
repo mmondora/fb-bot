@@ -70,7 +70,7 @@ public class Sender {
         TwoChoicePostback o = new TwoChoicePostback();
         o.recipient.id = id;
         PBPayload payload = o.message.attachment.payload;
-        payload.addElement("Agyo, nuovo documento", text, "https://app.agyo.io/console/index.html");
+        payload.addElement(text, "", "https://app.agyo.io/console/index.html");
         payload.last().addPostbackButton("Rifiuta", "Rifiuta@" + uuid);
         payload.last().addPostbackButton("Accetta", "Accetta@" + uuid);
         sendPostback(o);
@@ -94,7 +94,7 @@ public class Sender {
         return createPostBack(id);
     }
 
-    String getId( JsonNode node ) {
+    public static String getId(JsonNode node) {
         String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
         return id;
     }

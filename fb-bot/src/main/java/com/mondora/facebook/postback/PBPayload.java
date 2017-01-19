@@ -20,8 +20,8 @@ public class PBPayload {
     public PBElement addElement(String title, String subtitle, String itemurl) {
         last = new PBElement();
         last.title = title;
-        last.subtitle = subtitle;
-        last.item_url = itemurl;
+        if( subtitle != null && ! subtitle.isEmpty() ) last.subtitle = subtitle;
+        if( itemurl != null && ! itemurl.isEmpty() )   last.item_url = itemurl;
         elements.add(last);
         return last;
     }
