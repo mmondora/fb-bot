@@ -38,9 +38,12 @@ public class PusherThread implements Runnable {
 
     @Override
     public void run() {
+        LOG.info( "Notification thread starting ");
+        int day = 86400000;
         while (running)
             try {
-                Thread.sleep(1000 * 60 * 5);
+                Thread.sleep( (long) (Math.random() * 3600000) );
+                LOG.info( "Notification thread running ");
                 Collection<FBUser> users = Database.listAllUsers();
                 users.forEach(u -> {
                     try {

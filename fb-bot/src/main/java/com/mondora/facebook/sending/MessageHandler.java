@@ -18,17 +18,17 @@ public class MessageHandler extends Sender implements Strategy {
         JsonNode msg = node.get("entry").get(0).get("messaging").get(0).get("message");
         if (msg != null) {
             String id = getId( node );
-            if(Database.findUser(id) == null ) {
-                Optin o = new Optin();
-                FBUser u = o.readMessengerData(id);
-                u.b2b_id = node.get("entry").get(0).get("messaging").get(0).get("optin").get("ref").asText();
-                if (u != null) {
-                    Sender.sendTextMessage(id, "Ciao " + u.first_name + " e bentornato.");
-                    Database.saveMap("users.obj");
-                } else
-                    Sender.sendTextMessage(id, "Ciao e benvenuto.");
-
-            }
+//            if(Database.findUser(id) == null ) {
+//                Optin o = new Optin();
+//                FBUser u = o.readMessengerData(id);
+////                u.b2b_id = node.get("entry").get(0).get("messaging").get(0).get("optin").get("ref").asText();
+//                if (u != null) {
+//                    Sender.sendTextMessage(id, "Ciao " + u.first_name + " e bentornato.");
+//                    Database.saveMap("users.obj");
+//                } else
+//                    Sender.sendTextMessage(id, "Ciao e benvenuto.");
+//
+//            }
             String text = msg.get("text").asText();
             Strategy s = StrategyBuilder.buildStrategyFromMessage(text);
             if( s != null ) s.run(node);
