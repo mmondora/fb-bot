@@ -18,6 +18,7 @@ public class FBUser implements Serializable {
     public String gender;
     public String is_payment_enabled;
     public String b2b_id;
+    public boolean active = true;
 
     @Override
     public String toString() {
@@ -27,6 +28,7 @@ public class FBUser implements Serializable {
                 ", \"first_name\" :\"" + first_name + "\"" +
                 ", \"last_name\" :\"" + last_name + "\"" +
                 ", \"b2b_id\" :\"" + b2b_id + "\"" +
+                ", \"active\" :\"" + active + "\"" +
 //                ", \"profile_pic\" :\"" + profile_pic + "\"" +
 //                ", \"locale\" : \"" + locale + "\"" +
 //                ", \"timezone\" :\"" + timezone + "\"" +

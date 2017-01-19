@@ -3,11 +3,12 @@ package com.mondora;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mondora.facebook.StrategyBuilder;
-import com.mondora.facebook.sending.Sender;
-import com.mondora.facebook.sending.Strategy;
+import com.mondora.facebook.Connector;
+import com.mondora.facebook.commands.Strategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.facebook.api.Facebook;
@@ -18,7 +19,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 import static com.mondora.Utils.valid;
@@ -44,7 +44,7 @@ public class HelloController {
             return "redirect:/connect/facebook";
         }
 
-//        model.addAttribute("facebookProfile", facebook.userOperations().getUserProfile());
+//        b2b.addAttribute("facebookProfile", facebook.userOperations().getUserProfile());
         String[] fields = {"id", "email", "first_name", "last_name"};
         org.springframework.social.facebook.api.User userProfile = facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
 
@@ -55,12 +55,18 @@ public class HelloController {
         return "hello";
     }
 
-    @RequestMapping(path = "map", method = RequestMethod.GET)
+    @RequestMapping(path = "map", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> map() {
         LOG.debug("GET /map " );
         StringBuffer out = new StringBuffer();
-        Database.listAll().forEach(o -> out.append(o.toString()));
-        Database.listAllPostback().forEach(o -> out.append( Utils.toJson(o)));
+        out.append("{");
+        out.append( "'users':{");
+        Database.listAllUsers().forEach(o -> out.append(o.toString()));
+//        out.append( "}, 'postback':{");
+//        Database.listAllPostback().forEach( o-> o + ":\"" + Database.getPostback(o) +"" );
+        out.append("}, 'fattura':{");
+        Database.listFattura().forEach(o -> out.append( Utils.toJson(o)));
+        out.append( "}}");
         return new ResponseEntity<String>(out.toString(), HttpStatus.OK);
     }
 
@@ -114,7 +120,7 @@ public class HelloController {
 
     @RequestMapping(path = "send", method = RequestMethod.POST)
     public ResponseEntity<String> send(@RequestParam String id, @RequestParam String text) {
-        Sender.sendTextMessage(id, text);
+        Connector.sendTextMessage(id, text);
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 }

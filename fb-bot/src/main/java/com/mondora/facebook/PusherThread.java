@@ -1,8 +1,9 @@
-package com.mondora.facebook.sending.model;
+package com.mondora.facebook;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mondora.Database;
+import com.mondora.facebook.commands.b2b.FatturaNotification;
 import com.mondora.model.FBUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,9 @@ public class PusherThread implements Runnable {
         int day = 86400000;
         while (running)
             try {
-                Thread.sleep( (long) (Math.random() * 3600000) );
-                LOG.info( "Notification thread running ");
+                long sleep = (long) (Math.random() * 1000*60*60);
+                LOG.info( "Notification thread sleep " + sleep );
+                Thread.sleep( sleep );
                 Collection<FBUser> users = Database.listAllUsers();
                 users.forEach(u -> {
                     try {

@@ -1,8 +1,8 @@
 package com.mondora.facebook;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mondora.facebook.sending.*;
-import com.mondora.facebook.sending.model.*;
+import com.mondora.facebook.commands.*;
+import com.mondora.facebook.commands.b2b.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,19 +30,29 @@ public class StrategyBuilder {
 
     public static Strategy buildStrategyFromMessage(String text) {
         Strategy out = new Default();
-        if (text != null)
-            if (text.toLowerCase().contains("is_echo")) {
-            } else if (text.toLowerCase().contains("help")) {
+        if (text != null) {
+            String t = text.toLowerCase().trim();
+            if (t.contains("echo")) {
+            } else if (t.contains("help")) {
                 out = new Help();
-            } else if (text.toLowerCase().equals("fattura")) {
+            } else if (t.equals("fattura")) {
                 out = new FatturaNotification();
-            } else if (text.toLowerCase().equals("stats")) {
+            } else if (t.equals("stats")) {
                 out = new Stats();
-            } else if (text.toLowerCase().equals("listtoday")) {
+            } else if (t.equals("listtoday")) {
                 out = new ListToday();
-            } else if (text.toLowerCase().equals("list")) {
+            } else if (t.equals("list")) {
                 out = new List();
+            } else if (t.startsWith("sethubid")) {
+                out = new SettingHubID();
+            } else if (t.equals("status")) {
+                out = new Status();
+            } else if (t.startsWith("subscribe")) {
+                out = new Subscribe();
+            } else if (t.startsWith("unsubscribe")) {
+                out = new Unsubscribe();
             }
+        }
         return out;
     }
 

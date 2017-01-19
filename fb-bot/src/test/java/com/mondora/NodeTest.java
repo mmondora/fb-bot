@@ -2,8 +2,8 @@ package com.mondora;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mondora.facebook.sending.Sender;
-import com.mondora.facebook.sending.model.PusherThread;
+import com.mondora.facebook.Connector;
+import com.mondora.facebook.PusherThread;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class NodeTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = mapper.readTree(json);
 
-        String load = Sender.getId( node );
+        String load = Connector.getId(node);
         assertEquals( id, load );
     }
 }

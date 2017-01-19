@@ -1,14 +1,15 @@
-package com.mondora.facebook.sending;
+package com.mondora.facebook.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Database;
+import com.mondora.facebook.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Created by mmondora on 19/01/2017.
  */
-public class PostBackDefault extends Sender implements Strategy {
+public class PostBackDefault extends Connector implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(PostBackDefault.class);
     protected String act;
     protected String uuid;

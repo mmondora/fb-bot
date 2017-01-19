@@ -1,5 +1,6 @@
 package com.mondora;
 
+import com.mondora.facebook.commands.Optin;
 import com.mondora.model.FBUser;
 import com.mondora.model.Fattura;
 import org.slf4j.Logger;
@@ -7,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * Created by mmondora on 12/01/2017.
@@ -18,17 +19,15 @@ public class Database {
     static final Properties postbacks = new Properties();
     static final Map<String,Fattura> fattura = new HashMap();
 
-    static {
-        loadMap("users.obj");
-
-        addFattura( new Fattura( "15-01-2017", "QC Terme Bormio", 150.27 ));
-        addFattura( new Fattura( "18-01-2017", "Mondora SRL SB", 10 ));
-        addFattura( new Fattura( "19-01-2017", "Easy Rent SRL", 209.51 ));
-        addFattura( new Fattura( "18-01-2017", "Autogrill S.P.A.", 55.3 ));
-        addFattura( new Fattura( "22-01-2017", "Cozza Amara", 200 ));
-        addFattura( new Fattura( "23-01-2017", "Mercedes Benz", 7500 ));
-        addFattura( new Fattura( "26-01-2017", "TIM s.p.a.", 25 ));
-    }
+//    static {
+//        addFattura( new Fattura( "15-01-2017", "QC Terme Bormio", 150.27 ));
+//        addFattura( new Fattura( "18-01-2017", "Mondora SRL SB", 10 ));
+//        addFattura( new Fattura( "19-01-2017", "Easy Rent SRL", 209.51 ));
+//        addFattura( new Fattura( "18-01-2017", "Autogrill S.P.A.", 55.3 ));
+//        addFattura( new Fattura( "22-01-2017", "Cozza Amara", 200 ));
+//        addFattura( new Fattura( "23-01-2017", "Mercedes Benz", 7500 ));
+//        addFattura( new Fattura( "26-01-2017", "TIM s.p.a.", 25 ));
+//    }
 
     public static void saveMap(String filename) {
         if (users != null && !users.isEmpty())
@@ -65,10 +64,6 @@ public class Database {
         return users;
     }
 
-    protected static Collection<FBUser> listAll() {
-        return users.values();
-    }
-
     public static void addPostbacks(String uuid, String text) {
         postbacks.put(uuid,text);
     }
@@ -82,7 +77,12 @@ public class Database {
     }
 
     public static FBUser findUser(String id) {
-        return users.get(id);
+        FBUser user = users.get(id);
+        if (user == null) {
+            user = new Optin().readMessengerData(id);
+            Database.saveUser(id, user);
+        }
+        return user;
     }
     public static Optional<FBUser> findUserByB2B(String id) {
         return users.values().stream().filter( o->o.b2b_id.equals(id )).findAny();
@@ -107,8 +107,13 @@ public class Database {
         return fattura.values();
     }
 
+    public static Collection<Fattura> listFattura( String b2bUser ) {
+        return fattura.values().stream().filter( f->f.b2b_user.equals(b2bUser)).collect(Collectors.toList());
+    }
+
     public static void addFattura( Fattura f ) {
         fattura.put( f.id, f );
+        LOG.debug( "Fattura " + Utils.toJson(f));
     }
     public static double totaleFattura() {
         return fattura.values().stream().mapToDouble( o->o.importo ).sum();
@@ -126,5 +131,11 @@ public class Database {
 
     public static Fattura findFattura(String uuid) {
         return fattura.get(uuid);
+    }
+
+    public static Optional<FBUser> randomUser() {
+        List<FBUser> tmp = users.values().stream().filter( u->u.b2b_id != null ).collect(Collectors.toList());
+        if(tmp.size()>0) return Optional.of(tmp.get(new Random().nextInt(tmp.size())));
+        return Optional.of(null);
     }
 }

@@ -1,4 +1,4 @@
-package com.mondora.facebook.sending;
+package com.mondora.facebook.commands;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Utils;
