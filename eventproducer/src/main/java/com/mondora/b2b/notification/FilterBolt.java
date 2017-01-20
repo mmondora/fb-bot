@@ -43,10 +43,12 @@ public class FilterBolt extends BaseBolt {
         ThreadContext.put("step", "input");
         LOG.info("Filter event");
         Status event = (Status) tuple.getValueByField("status");
-        if (event != null && event.isValid() && "SDI".equals(event.getDocType()) && "FIRMATO".equals(event.getEventName())) {
+        if (event != null && event.isValid() ) {
             ThreadContext.put("step", "output");
             ThreadContext.put("exec_time", String.valueOf(System.currentTimeMillis() - now));
             LOG.info("Event emitted: {}", event.toString());
+
+
             emit(tuple, new Values(event));
         }
         ack(tuple);

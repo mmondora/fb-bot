@@ -28,11 +28,11 @@ public class NotificationTopology extends BaseEventHubTopology {
         int partitionCount = getSpoutConfig().getPartitionCount();
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 
-//        topologyBuilder.setSpout("all-events", eventHubSpout, partitionCount)
-//                .setNumTasks(partitionCount);
-//        topologyBuilder.setBolt("parse-bolt", new ParseEventBolt(), 2)
-//                .localOrShuffleGrouping("all-events")
-//                .setNumTasks(2);
+        topologyBuilder.setSpout("all-events", eventHubSpout, partitionCount)
+                .setNumTasks(partitionCount);
+        topologyBuilder.setBolt("filter-bolt", new FilterBolt(), 2)
+                .localOrShuffleGrouping("all-events")
+                .setNumTasks(2);
 //
 //        topologyBuilder.setBolt("validation-filter-bolt", new ValidationFilterBolt(), 2)
 //                .localOrShuffleGrouping("parse-bolt")
