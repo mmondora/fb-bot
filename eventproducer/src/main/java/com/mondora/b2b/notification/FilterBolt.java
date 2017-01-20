@@ -29,7 +29,6 @@ import backtype.storm.task.OutputCollector;
  * 15/06/16
  */
 public class FilterBolt extends BaseBolt {
-
     private transient static final Logger LOG = LogManager.getLogger(FilterBolt.class);
 
     @Override

@@ -78,7 +78,7 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
-            <plugin>
+            <!-- plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <executions>
@@ -91,50 +91,8 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.mondora.teamsystem.hub.b2b.storm.SDITopology</mainClass>
+                                    <mainClass>com.mondora.b2b.notification.NotificationTopology</mainClass>
                                 </transformer>
-                                <!--
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
-                                    <projectName>Apache CXF</projectName>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.handlers</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/services/com.sun.tools.xjc.Plugin</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/cxf/cxf.extension</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
-                                    <resource>META-INF/extensions.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
-                                    <resource>META-INF/cxf/extensions.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/cxf/bus-extensions.txt</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
-                                    <resource>META-INF/cxf/bus-extensions.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
-                                    <resource>META-INF/wsdl.plugin.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
-                                    <resource>META-INF/tools.service.validator.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.cxf.maven.PluginTransformer">
-                                    <resource>META-INF/tools-plugin.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
-                                    <resource>META-INF/cxf/java2wsbeans.xml</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.cxf.maven.CXFAllTransformer" />
-                                -->
                             </transformers>
                             <filters>
                                 <filter>
@@ -158,26 +116,7 @@
                         <scope>compile</scope>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.codehaus.mojo</groupId>-->
-            <!--<artifactId>jaxb2-maven-plugin</artifactId>-->
-            <!--<version>2.2</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>xjc</id>-->
-            <!--<goals>-->
-            <!--<goal>xjc</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--<configuration>-->
-            <!--<sources>-->
-            <!--<source>${basedir}/src/main/resources/fatturapa_v1.2.xsd</source>-->
-            <!--<source>${basedir}/src/main/resources/MessaggiTypes_v1.1.xsd</source>-->
-            <!--</sources>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
+            </plugin -->
         </plugins>
     </build>
 </project>

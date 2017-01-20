@@ -13,9 +13,9 @@ import com.mondora.teamsystem.hub.storage.StorageFileImpl;
 import com.mondora.teamsystem.hub.storm.BaseEventHubBolt;
 import com.mondora.teamsystem.hub.utils.json.JsonParseException;
 import com.mondora.teamsystem.hub.utils.json.JsonSerializerFactory;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -24,9 +24,9 @@ import java.util.Map;
 /**
  * Created by mmondora on 13/01/2017.
  */
-public class BaseBolt extends BaseEventHubBolt {
+public abstract class BaseBolt extends BaseEventHubBolt {
     private static final long serialVersionUID = -6179789893877330889L;
-    private transient static final Logger LOG = LogManager.getLogger(BaseBolt.class);
+    private transient static final Logger LOG = LoggerFactory.getLogger(BaseBolt.class);
     private transient EventHubSendClient eventHubSendClient;
     private transient JsonSerializerFactory jsonSerializerFactory;
 
@@ -109,7 +109,7 @@ public class BaseBolt extends BaseEventHubBolt {
             ThreadContext.put("action", "deserialize");
             ThreadContext.put("step", "input");
             ThreadContext.put("payload", tuple.toString());
-//            LOG.info("Deserialize {}", claz.getSimpleName());
+            LOG.info("Deserialize {}", claz.getSimpleName());
         }
 
         String jsonEvent = tuple.getString(0);
@@ -117,7 +117,7 @@ public class BaseBolt extends BaseEventHubBolt {
         try {
             object = (T) jsonSerializerFactory.fromJson(jsonEvent, claz);
             if (LOG.isInfoEnabled()) {
-//                LOG.info("Deserialized {}", claz.getSimpleName());
+                LOG.info("Deserialized {}", claz.getSimpleName());
             }
         } catch (JsonParseException e) {
             ThreadContext.put("step", "output");
