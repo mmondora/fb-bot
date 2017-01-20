@@ -1,5 +1,6 @@
 package com.mondora;
 
+import com.mondora.facebook.menu.Menu;
 import com.mondora.facebook.commands.Optin;
 import com.mondora.model.FBUser;
 import com.mondora.model.Fattura;
@@ -134,7 +135,7 @@ public class Database {
     }
 
     public static Optional<FBUser> randomUser() {
-        List<FBUser> tmp = users.values().stream().filter( u->u.b2b_id != null ).collect(Collectors.toList());
+        List<FBUser> tmp = users.values().stream().filter(u -> u.b2b_id != null).collect(Collectors.toList());
         if(tmp.size()>0) return Optional.of(tmp.get(new Random().nextInt(tmp.size())));
         return Optional.of(null);
     }

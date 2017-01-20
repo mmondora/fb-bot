@@ -2,6 +2,7 @@ package com.mondora;
 
 import com.mondora.facebook.Connector;
 import com.mondora.facebook.PusherThread;
+import com.mondora.facebook.menu.Menu;
 import com.mondora.model.FBUser;
 import com.mondora.model.Fattura;
 import org.slf4j.Logger;
@@ -60,6 +61,7 @@ public class Application {
                 Connector.sendTextMessage(u.messenger_id, "Agyo bot is back.");
             });
 
+        new com.mondora.facebook.commands.Menu().run(null);
         new Thread(new PusherThread()).start();
     }
 

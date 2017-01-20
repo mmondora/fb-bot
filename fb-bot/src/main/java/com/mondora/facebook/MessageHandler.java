@@ -19,7 +19,7 @@ public class MessageHandler extends Connector implements Strategy {
         JsonNode msg = node.get("entry").get(0).get("messaging").get(0).get("message");
         if (msg != null && msg.get("text") != null ) {
             String id = getId( node );
-//            FBUser u = Database.findUser(id);
+            FBUser u = Database.findUser(id);
             String text = msg.get("text").asText();
             Strategy s = StrategyBuilder.buildStrategyFromMessage(text);
             if( s != null ) s.run(node);

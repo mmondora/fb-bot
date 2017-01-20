@@ -19,6 +19,7 @@ public class FBUser implements Serializable {
     public String is_payment_enabled;
     public String b2b_id;
     public boolean active = true;
+    public String cred;
 
     @Override
     public String toString() {

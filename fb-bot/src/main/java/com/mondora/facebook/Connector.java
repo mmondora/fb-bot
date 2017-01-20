@@ -10,6 +10,7 @@ import com.mondora.model.FBUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -20,8 +21,8 @@ import static com.mondora.Utils.convertStreamToString;
  * Created by mmondora on 12/01/2017.
  */
 public class Connector {
-    static final String PAGE_ACCESS_TOKEN = Utils.getenv("FACEBOOK_PAGE_ACCESS_TOKEN");
-    static final String FACEBOOK_API_VERSION = Utils.getenv("FACEBOOK_API_VERSION", "v2.6");
+    protected static final String PAGE_ACCESS_TOKEN = Utils.getenv("FACEBOOK_PAGE_ACCESS_TOKEN");
+    protected static final String FACEBOOK_API_VERSION = Utils.getenv("FACEBOOK_API_VERSION", "v2.6");
 
     private static final Logger LOG = LoggerFactory.getLogger(Connector.class);
 
@@ -29,50 +30,60 @@ public class Connector {
         if (checkIdActive(id)) {
             sendGenericMessage_NOCheck(payload);
         } else {
-            LOG.info( "User id:" + id + " ignored message." );
+            LOG.info("User id:" + id + " ignored message.");
+        }
+    }
+
+    /*
+        Send without checking to any URL
+        it adds only the access_token
+     */
+    protected static void POST(String hostname, String payload) {
+        LOG.debug("--- StartOfTransmission");
+        try {
+            String url = hostname + "?access_token=" + PAGE_ACCESS_TOKEN;
+            HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
+            urlc.setRequestMethod("POST");
+            urlc.setDoOutput(true);
+            urlc.setRequestProperty("Content-Type", "application/json");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("POST " + url);
+                LOG.debug(payload);
+            }
+
+            try (OutputStream output = urlc.getOutputStream()) {
+                output.write(payload.getBytes());
+            }
+
+            LOG.info("POST " + hostname + " " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
+            if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
+                if (LOG.isDebugEnabled()) try {
+                    String json = convertStreamToString(urlc.getInputStream());
+                    LOG.debug("Response " + json);
+                } catch (IOException ie) {
+                }
+            } else {
+                if (LOG.isErrorEnabled()) try {
+                    String err = convertStreamToString(urlc.getErrorStream());
+                    LOG.error(err);
+                } catch (Exception ie) {
+                }
+            }
+            LOG.debug("--- EndOfTransmission");
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
     public static void sendGenericMessage_NOCheck(String payload) {
         new Thread(() -> {
-            LOG.debug("--- StartOfTransmission");
-            try {
-                String hostname = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/me/messages";
-                String url = hostname + "?access_token=" + PAGE_ACCESS_TOKEN;
-                HttpURLConnection urlc = (HttpURLConnection) new URL(url).openConnection();
-                urlc.setRequestMethod("POST");
-                urlc.setDoOutput(true);
-                urlc.setRequestProperty("Content-Type", "application/json");
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("POST " + url);
-                    LOG.debug(payload);
-                }
-
-                try (OutputStream output = urlc.getOutputStream()) {
-                    output.write(payload.getBytes());
-                }
-                String json = convertStreamToString(urlc.getInputStream());
-                String err = convertStreamToString(urlc.getErrorStream());
-                LOG.info("POST " + hostname + " " + urlc.getResponseCode() + " " + urlc.getResponseMessage());
-                if (urlc.getResponseCode() >= 200 && urlc.getResponseCode() < 300) {
-                    LOG.debug("Response " + json);
-                } else {
-                    LOG.error(err);
-                }
-                LOG.debug("--- EndOfTransmission");
-
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
+            String hostname = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/me/messages";
+            POST(hostname, payload);
         }).run();
     }
 
     static public FBUser readMessengerData(String id) {
-//        FBUser find = Database.findUser(id);
-//        if (find != null) {
-//            LOG.debug("Cache Hit for user " + find.messenger_id + " " + find.first_name + " " + find.last_name);
-//            return find;
-//        } else
         try {
             String hostname = "https://graph.facebook.com/" + FACEBOOK_API_VERSION + "/" + id;
             String url = hostname + "?fields=first_name,last_name,profile_pic,locale,timezone,gender";
@@ -115,6 +126,7 @@ public class Connector {
         }
     }
 
+
     protected static boolean checkIdActive(String id) {
         return Database.findUser(id).active;
     }
@@ -138,14 +150,11 @@ public class Connector {
         sendPostback(o);
     }
 
-    ;
-
     public static void sendPostback(TwoChoicePostback o) {
         String json = Utils.toJson(o);
         if (json != null) {
             sendGenericMessage(o.recipient.id, json);
         }
-        ;
     }
 
     public static String getId(JsonNode node) {
