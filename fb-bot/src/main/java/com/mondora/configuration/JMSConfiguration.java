@@ -29,7 +29,7 @@ public class JMSConfiguration {
     @Bean
     public ConnectionFactory jmsConnectionFactory(@Value("${BUS_USER}") final String username,
                                                   @Value("${BUS_PASS}") final String password,
-                                                  @Value("${BUS_HOST}") final String hostname,
+                                                  @Value("${servicebustopic.hostname}") final String hostname,
                                                   @Value("${info.build.name}") final String clientId) {
         String urlString = String.format("amqps://%1s?amqp.idleTimeout=3600000", hostname);
         JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(urlString);

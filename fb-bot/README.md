@@ -11,12 +11,15 @@ Configurazione AuthUpdater
 
 ```
 #!sh
-export BUS_HOST="bus-b2bhub-dev.servicebus.windows.net"
 export BUS_USER="read”
 export BUS_PASS="“
 export SUBSCRIPTION_NAME=“b2b_bot"
-export TOPIC_NAME="b2b_notification"
-export FACEBOOK_PAGE_ACCESS_TOKEN=""
+
+export servicebustopic.policyname="write";
+export servicebustopic.policykey=""
+export servicebustopic.hostname="bus-b2bhub-dev.servicebus.windows.net"
+export servicebustopic.topicname="b2b_notification"
+export servicebustopic.subscription_name=“b2b_bot"
 ```
 
 Compilazione

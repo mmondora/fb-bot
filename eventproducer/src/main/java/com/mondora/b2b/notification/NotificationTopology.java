@@ -30,7 +30,7 @@ public class NotificationTopology extends BaseEventHubTopology {
 
         topologyBuilder.setSpout("all-events", eventHubSpout, partitionCount)
                 .setNumTasks(partitionCount);
-        topologyBuilder.setBolt("filter-bolt", new FilterBolt(), 2)
+        topologyBuilder.setBolt("filter-bolt", new PublishOnServiceBusBolt(), 2)
                 .localOrShuffleGrouping("all-events")
                 .setNumTasks(2);
 //

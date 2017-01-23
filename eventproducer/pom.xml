@@ -12,6 +12,7 @@
 
     <properties>
         <hub.utils.version>3.7.0</hub.utils.version>
+        <hub.servicebus.version>3.9.1</hub.servicebus.version>
         <hub.core-events.version>1.13.4</hub.core-events.version>
     </properties>
 
@@ -37,6 +38,11 @@
             <groupId>com.teamsystem.hub</groupId>
             <artifactId>utils</artifactId>
             <version>${hub.utils.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.teamsystem.hub</groupId>
+            <artifactId>servicebus-utils</artifactId>
+            <version>${hub.servicebus.version}</version>
         </dependency>
 
         <!-- Mondora -->
@@ -65,6 +71,30 @@
             <artifactId>tika-core</artifactId>
             <version>1.13</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>4.2.5.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>qpid-jms-client</artifactId>
+            <version>0.11.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.6.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>
