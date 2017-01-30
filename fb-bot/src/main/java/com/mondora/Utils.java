@@ -6,10 +6,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.context.request.WebRequest;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+
 /**
  * Created by mmondora on 12/01/2017.
  */
 public class Utils {
+
+    public static final String EUR = "€";
+    public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,##0.00 " + Utils.EUR);
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("DD-MM-yyyy");
 
     public static String convertStreamToString(java.io.InputStream is) {
         if (is != null) {

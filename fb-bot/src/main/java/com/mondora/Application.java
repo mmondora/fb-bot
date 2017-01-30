@@ -29,7 +29,6 @@ public class Application {
         Objects.requireNonNull(System.getenv("BUS_HOST"), "BUS_HOST must not be null");
         Objects.requireNonNull(System.getenv("TOPIC_NAME"), "TOPIC_NAME must not be null");
         Objects.requireNonNull(System.getenv("SUBSCRIPTION_NAME"), "SUBSCRIPTION_NAME must not be null");
-        Objects.requireNonNull(System.getenv("SUBSCRIPTION_NAME"), "SUBSCRIPTION_NAME must not be null");
         Objects.requireNonNull(System.getenv("FACEBOOK_PAGE_ACCESS_TOKEN"), "FACEBOOK_PAGE_ACCESS_TOKEN must not be null");
 
         Database.loadMap("users.obj");

@@ -2,6 +2,7 @@ package com.mondora.facebook.commands.b2b;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Database;
+import com.mondora.Utils;
 import com.mondora.facebook.commands.Default;
 import com.mondora.facebook.Connector;
 import com.mondora.facebook.commands.Strategy;
@@ -20,7 +21,6 @@ import java.util.UUID;
  */
 public class FatturaNotification extends Connector implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(Default.class);
-    static DecimalFormat decimalFormat = new DecimalFormat("#,##0.00€");
 
     @Override
     public void run(JsonNode node) {
@@ -29,7 +29,7 @@ public class FatturaNotification extends Connector implements Strategy {
         if( fb.b2b_id != null ) {
             Fattura f = new Fattura( new Date(), Database.randomCustomer(), Math.random() * 1000, fb.b2b_id );
             Database.addFattura( f );
-            String fattua = "Ricevuta fattura da " + f.mittente  + " di " + decimalFormat.format( f.importo ) + "€ ";
+            String fattua = "Ricevuta fattura da " + f.mittente  + " di " + Utils.DECIMAL_FORMAT.format( f.importo );
             LOG.info("Nuova " + fattua);
             String uuid = UUID.randomUUID().toString();
             sendStructuredMessage(id, uuid, fattua);

@@ -28,9 +28,9 @@ public class MessageConsumerListener implements javax.jms.MessageListener {
         this.strategyService = strategyService;
     }
 
-    @JmsListener(destination = "${servicebustopic.topicname}",
+    @JmsListener(destination = "${servicebustopic_topicname}",
             containerFactory = "jmsListenerContainerFactory",
-            subscription = "${servicebustopic.subscription_name}" )
+            subscription = "${servicebustopic_subscription_name}" )
     @Override
     public void onMessage(final Message message) {
         long now = System.currentTimeMillis();

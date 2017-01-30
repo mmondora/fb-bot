@@ -26,10 +26,10 @@ public class Messages {
 
     @Test
     public void send() {
-        System.setProperty("servicebustopic.policyname", "write");
+        System.setProperty("servicebustopic_policyname", "write");
 //        System.setProperty("servicebustopic.policykey", "vIbsS6i+RIQyjNzgKfZxIHIsistDKTaEbus2UVX4JYw=");
-        System.setProperty("servicebustopic.hostname", "bus-b2bhub-dev.servicebus.windows.net");
-        System.setProperty("servicebustopic.topicname", "b2b_notification");
+        System.setProperty("servicebustopic_hostname", "bus-b2bhub-dev.servicebus.windows.net");
+        System.setProperty("servicebustopic_topicname", "b2b_notification");
         try {
             TopicHttpClientFactory.getInstance().getTopicHttpClient().send("{\"status\":\"Il mio amico FoodEmperor!\"}");
             fail("must not be here");
@@ -40,10 +40,10 @@ public class Messages {
 
     @Test
     public void sendAndReceive() throws JMSException {
-        System.setProperty("servicebustopic.policyname", "write");
-        System.setProperty("servicebustopic.policykey", "vIbsS6i+RIQyjNzgKfZxIHIsistDKTaEbus2UVX4JYw=");
-        System.setProperty("servicebustopic.hostname", "bus-b2bhub-dev.servicebus.windows.net");
-        System.setProperty("servicebustopic.topicname", "b2b_notification");
+        System.setProperty("servicebustopic_policyname", "write");
+        System.setProperty("servicebustopic_policykey", "vIbsS6i+RIQyjNzgKfZxIHIsistDKTaEbus2UVX4JYw=");
+        System.setProperty("servicebustopic_hostname", "bus-b2bhub-dev.servicebus.windows.net");
+        System.setProperty("servicebustopic_topicname", "b2b_notification");
         TopicHttpClientFactory.getInstance().getTopicHttpClient().send("{\"status\":\"Il mio amico FoodEmperor!\"}");
 
         System.out.println("Hei");
@@ -66,7 +66,7 @@ public class Messages {
 
     public ConnectionFactory jmsConnectionFactory(@Value("${BUS_USER}") final String username,
                                                   @Value("${BUS_PASS}") final String password,
-                                                  @Value("${servicebustopic.hostname}") final String hostname,
+                                                  @Value("${servicebustopic_hostname}") final String hostname,
                                                   @Value("${info.build.name}") final String clientId) {
         String urlString = String.format("amqps://%1s?amqp.idleTimeout=3600000", hostname);
         JmsConnectionFactory jmsConnectionFactory = new JmsConnectionFactory(urlString);
@@ -91,9 +91,9 @@ public class Messages {
 class MessageConsumerListener implements javax.jms.MessageListener {
     private static final Logger LOG = LoggerFactory.getLogger(MessageConsumerListener.class);
 
-    @JmsListener(destination = "${servicebustopic.topicname}",
+    @JmsListener(destination = "${servicebustopic_topicname}",
             containerFactory = "jmsListenerContainerFactory",
-            subscription = "${servicebustopic.subscription_name}")
+            subscription = "${servicebustopic_subscription_name}")
     @Override
     public void onMessage(final Message message) {
         long now = System.currentTimeMillis();

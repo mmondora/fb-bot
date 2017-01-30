@@ -2,6 +2,7 @@ package com.mondora.facebook.commands.b2b;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Database;
+import com.mondora.Utils;
 import com.mondora.facebook.Connector;
 import com.mondora.facebook.commands.Strategy;
 import com.mondora.facebook.postback.PBPayload;
@@ -11,8 +12,6 @@ import com.mondora.model.Fattura;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -21,8 +20,6 @@ import java.util.Collections;
  */
 public class List extends Connector implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(List.class);
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("DD-MM-yyyy");
-    static DecimalFormat decimalFormat = new DecimalFormat("#,##0.00€");
 
     public void sendListaFatture(String id, Collection<Fattura> leneco) {
         LOG.info("sendListaFatture {}", id);
@@ -33,7 +30,7 @@ public class List extends Connector implements Strategy {
                     {
                         TwoChoicePostback o = createPostBack(id);
                         PBPayload payload = o.message.attachment.payload;
-                        String text = "Fattura del " + sdf.format(oo.data) + " da " + oo.mittente + " " + decimalFormat.format(oo.importo) + "€";
+                        String text = "Fattura del " + Utils.SIMPLE_DATE_FORMAT.format(oo.data) + " da " + oo.mittente + " " + Utils.DECIMAL_FORMAT.format(oo.importo);
                         payload.addElement(text, null, "https://app.agyo.io/console/index.html").
                                 addPostbackButton("view", "View@" + oo.id);
                         sendPostback(o);

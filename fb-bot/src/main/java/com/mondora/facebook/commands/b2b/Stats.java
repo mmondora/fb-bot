@@ -3,6 +3,7 @@ package com.mondora.facebook.commands.b2b;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Database;
 import com.mondora.DateUtils;
+import com.mondora.Utils;
 import com.mondora.facebook.postback.PBPayload;
 import com.mondora.facebook.postback.TwoChoicePostback;
 import com.mondora.facebook.Connector;
@@ -23,8 +24,6 @@ import java.util.stream.Collectors;
 public class Stats extends Connector implements Strategy {
     private static final Logger LOG = LoggerFactory.getLogger(Stats.class);
 
-    static DecimalFormat decimalFormat = new DecimalFormat("#,##0.00€");
-
     @Override
     public void run(JsonNode node) {
         String id = node.get("entry").get(0).get("messaging").get(0).get("sender").get("id").asText();
@@ -38,7 +37,7 @@ public class Stats extends Connector implements Strategy {
             String textStat = "Oggi hai ricevuto " + q + " fattur" + (q > 1 ? "e" : "a");
             PBPayload payload = o.message.attachment.payload;
             payload.addElement(textStat,
-                    " per un totale di " + decimalFormat.format(tot)
+                    " per un totale di " + Utils.DECIMAL_FORMAT.format(tot)
                     , "https://app.agyo.io/console/index.html").
                     addPostbackButton("Lista", "listToday");
             sendPostback(o);

@@ -15,11 +15,11 @@ export BUS_USER="read”
 export BUS_PASS="“
 export SUBSCRIPTION_NAME=“b2b_bot"
 
-export servicebustopic.policyname="write";
-export servicebustopic.policykey=""
-export servicebustopic.hostname="bus-b2bhub-dev.servicebus.windows.net"
-export servicebustopic.topicname="b2b_notification"
-export servicebustopic.subscription_name=“b2b_bot"
+export servicebustopic_policyname="write"
+export servicebustopic_policykey=""
+export servicebustopic_hostname="bus-b2bhub-dev.servicebus.windows.net"
+export servicebustopic_topicname="b2b_notification"
+export servicebustopic_subscription_name=“b2b_bot"
 ```
 
 Compilazione

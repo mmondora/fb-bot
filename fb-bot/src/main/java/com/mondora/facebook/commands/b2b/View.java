@@ -2,6 +2,7 @@ package com.mondora.facebook.commands.b2b;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mondora.Database;
+import com.mondora.Utils;
 import com.mondora.facebook.commands.PostBackDefault;
 import com.mondora.facebook.commands.Strategy;
 import com.mondora.model.Fattura;
@@ -17,6 +18,6 @@ public class View extends PostBackDefault implements Strategy {
     @Override
     public void run(JsonNode node) {
         Fattura f = Database.findFattura(uuid);
-        sendTextMessage( getId(node), "Hai visto la fattura di " + f.mittente + " " + f.importo );
+        sendTextMessage( getId(node), "Hai visto la fattura di " + f.mittente + " " + Utils.DECIMAL_FORMAT.format(f.importo) );
     }
 }
