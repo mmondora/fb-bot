@@ -1,7 +1,7 @@
 #!groovy​
 node {
     def DEPLOY_REPOS = [
-            ['fb-bot-0.1.0', 'git@bitbucket.org:mondora/fb-bot.git'],
+            ['fb-bot', 'git@bitbucket.org:mondora/fb-bot.git'],
     ]
     def TOOLS = ["Maven 3", "Jdk_8u102"]
 
