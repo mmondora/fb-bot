@@ -113,7 +113,7 @@ public class UserAuthenticationClient {
     }
 
     protected IUserAuthentication getService() {
-        JaxWsProxyFactoryBean factory = getJaxWsProxyFactoryBean("WS_FEPA_ATTIVA_USER_AUTH_ENDPOINT");
+        JaxWsProxyFactoryBean factory = getJaxWsProxyFactoryBean("WS_FEPA_PASSIVA_USER_AUTH_ENDPOINT");
         factory.setServiceClass(IUserAuthentication.class);
         IUserAuthentication port = (IUserAuthentication) factory.create();
         return port;
