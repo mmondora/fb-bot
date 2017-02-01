@@ -18,13 +18,14 @@ public class UserAuthenticationClient {
 
     public String login(String username, String password, String authenticateAs) throws Exception {
         long now = System.currentTimeMillis();
-//        if (LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
 //            LOG.debug(append("action", "fepaLogin").
 //                            <LogstashMarker>and(append("step", "input")).
 //                            <LogstashMarker>and(append("username", username)).
 //                            <LogstashMarker>and(append("authenticateAs", authenticateAs)),
-//                    "Attempting login for user '{}' as '{}", username, authenticateAs);
-//        }
+            LOG.debug(
+                    "Attempting login for user '{}' as '{}", username, authenticateAs);
+        }
 
         username = username.toLowerCase();
         password = password.toLowerCase();
@@ -42,20 +43,22 @@ public class UserAuthenticationClient {
 //                            <LogstashMarker>and(append("username", username)).
 //                            <LogstashMarker>and(append("exec_time", System.currentTimeMillis() - now)),
 //                    "Error while getTicket for user '" + username + "' errorMessage: '" + errorMessage + "'", e);
+            LOG.error("Error while getTicket for user '" + username + "' errorMessage: '" + errorMessage + "'", e);
             String output = StringThreadLocal.get();
             StringThreadLocal.unset();
             throw new Exception(errorMessage);
         }
         String ticket = ticketOutputDC.getTicket();
 
-//        if (LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
 //            LOG.debug(append("action", "getTicket").
 //                            <LogstashMarker>and(append("step", "output")).
 //                            <LogstashMarker>and(append("username", username)).
 //                            <LogstashMarker>and(append("ticket", ticket)).
 //                            <LogstashMarker>and(append("exec_time", System.currentTimeMillis() - now)),
 //                    "Received ticket '{}' for user '{}'", ticket, username);
-//        }
+            LOG.debug("Received ticket '{}' for user '{}'", ticket, username);
+        }
 
         String securityToken;
         try {
@@ -70,11 +73,12 @@ public class UserAuthenticationClient {
 //                            <LogstashMarker>and(append("username", username)).
 //                            <LogstashMarker>and(append("exec_time", System.currentTimeMillis() - now)),
 //                    "Error while trying digestAuthentication for user '" + username + "' errorMessage: '" + errorMessage + "'", e);
+            LOG.error("Error while trying digestAuthentication for user '" + username + "' errorMessage: '" + errorMessage + "'", e);
             String output = StringThreadLocal.get();
             StringThreadLocal.unset();
             throw new Exception(errorMessage);
         }
-//        if (LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
 //            LOG.debug(append("action", "fepaLogin").
 //                            <LogstashMarker>and(append("step", "output")).
 //                            <LogstashMarker>and(append("username", username)).
@@ -82,7 +86,8 @@ public class UserAuthenticationClient {
 //                            <LogstashMarker>and(append("securityToken", securityToken)).
 //                            <LogstashMarker>and(append("exec_time", System.currentTimeMillis() - now)),
 //                    "Received token '{}' for user '{}'", securityToken, username);
-//        }
+            LOG.debug("Received token '{}' for user '{}'", securityToken, username);
+        }
 //
         return securityToken;
     }

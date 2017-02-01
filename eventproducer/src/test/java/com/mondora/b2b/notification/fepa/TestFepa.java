@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class TestFepa {
 
-    @Test @Ignore
+    @Test
     public void testConnection() throws Exception {
         System.setProperty("WS_FEPA_ATTIVA_USER_AUTH_ENDPOINT","http://fepa-ws-test.teamsystem.com/knos/wcf/FE/Passiva/UserAuthentication.svc");
 
